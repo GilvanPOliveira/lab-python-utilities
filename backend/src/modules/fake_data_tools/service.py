@@ -20,7 +20,7 @@ FIRST_NAMES = [
     "Carla",
     "Diego",
     "Fernanda",
-    "Gilvan",
+    "Eduardo",
     "Helena",
     "Igor",
     "Juliana",

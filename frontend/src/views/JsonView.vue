@@ -77,7 +77,7 @@ function clearFields() {
           <textarea
             v-model="content"
             rows="16"
-            placeholder='{"name":"Gilvan","stack":["Vue","Python"]}'
+            placeholder='{"name":"Alex Demo","stack":["Vue","Python"]}'
             class="mt-2 w-full resize-y rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 font-mono text-sm text-white outline-none focus:border-teal-300"
           />
         </label>

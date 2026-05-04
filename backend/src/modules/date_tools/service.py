@@ -54,7 +54,7 @@ def parse_numeric_date(value: str) -> tuple[datetime, str]:
         except ValueError:
             raise HTTPException(
                 status_code=400,
-                detail="Data numérica inválida. Use o formato DDMMAAAA, exemplo: 05021992.",
+                detail="Data numérica inválida. Use o formato DDMMAAAA, exemplo: 23082024.",
             )
 
     if len(value) == 10:

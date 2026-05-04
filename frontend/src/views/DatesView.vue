@@ -161,7 +161,7 @@ async function copyResult() {
           <input
             v-model="mainDate"
             type="text"
-            placeholder="Ex: 05/02/1992, 05021992 ou 1992-02-05"
+            placeholder="Ex: 23/08/2024, 23082024 ou 2024-08-23"
             class="mt-2 w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
           />
 
@@ -176,7 +176,7 @@ async function copyResult() {
           <input
             v-model="secondDate"
             type="text"
-            placeholder="Ex: 15/05/2026"
+            placeholder="Ex: 14/11/2026"
             class="mt-2 w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
           />
         </label>

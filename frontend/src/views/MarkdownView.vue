@@ -7,7 +7,7 @@ type MarkdownMode = 'preview' | 'strip' | 'table' | 'list'
 const mode = ref<MarkdownMode>('preview')
 const content = ref('# Título\n\nTexto com **negrito**, *itálico* e `código`.\n\n- Item 1\n- Item 2')
 const headers = ref('Nome, Email, Stack')
-const rows = ref('Gilvan, gilvan@email.com, Vue\nAna, ana@email.com, Python')
+const rows = ref('Alex Demo, alex.demo@example.com, Vue\nSam Tester, sam.tester@example.com, Python')
 const listItems = ref('Item 1\nItem 2\nItem 3')
 const ordered = ref(false)
 
