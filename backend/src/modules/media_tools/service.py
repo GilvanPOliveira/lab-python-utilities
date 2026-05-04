@@ -1,5 +1,8 @@
 import base64
+import shutil
+import subprocess
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -10,11 +13,18 @@ MAX_MEDIA_SIZE = 80 * 1024 * 1024
 MAX_DURATION_SECONDS = 60 * 30
 
 
+@dataclass
+class GeneratedMediaFile:
+    path: Path
+    mime_type: str
+    cleanup_dir: Path
+
+
 def validate_media_url(url: str) -> str:
     cleaned = url.strip()
 
     if not cleaned:
-        raise HTTPException(status_code=400, detail="Informe uma URL válida.")
+        raise HTTPException(status_code=400, detail="Informe uma URL valida.")
 
     if not cleaned.startswith(("http://", "https://")):
         cleaned = f"https://{cleaned}"
@@ -22,7 +32,7 @@ def validate_media_url(url: str) -> str:
     parsed = urlparse(cleaned)
 
     if not parsed.netloc:
-        raise HTTPException(status_code=400, detail="URL inválida.")
+        raise HTTPException(status_code=400, detail="URL invalida.")
 
     return cleaned
 
@@ -31,16 +41,34 @@ def validate_authorized_context() -> None:
     return None
 
 
+def cleanup_generated_media(directory: Path) -> None:
+    shutil.rmtree(directory, ignore_errors=True)
+
+
+def resolve_ffmpeg_location() -> str | None:
+    ffmpeg_path = shutil.which("ffmpeg")
+
+    if ffmpeg_path:
+        return ffmpeg_path
+
+    try:
+        import imageio_ffmpeg
+    except ImportError:
+        return None
+
+    return imageio_ffmpeg.get_ffmpeg_exe()
+
+
 def read_generated_file(path: Path, mime_type: str) -> dict:
     if not path.exists():
-        raise HTTPException(status_code=500, detail="Arquivo gerado não encontrado.")
+        raise HTTPException(status_code=500, detail="Arquivo gerado nao encontrado.")
 
     content = path.read_bytes()
 
     if len(content) > MAX_MEDIA_SIZE:
         raise HTTPException(
             status_code=400,
-            detail="Arquivo gerado muito grande para retornar pela aplicação.",
+            detail="Arquivo gerado muito grande para retornar pela aplicacao.",
         )
 
     return {
@@ -63,10 +91,10 @@ def get_media_info(url: str) -> dict:
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(normalized, download=False)
-    except Exception:
+    except Exception as exc:
         raise HTTPException(
             status_code=400,
-            detail="Não foi possível obter informações da mídia.",
+            detail=f"Nao foi possivel obter informacoes da midia: {exc}",
         )
 
     duration = info.get("duration")
@@ -86,7 +114,7 @@ def ensure_duration_allowed(info: dict) -> None:
     if duration and duration > MAX_DURATION_SECONDS:
         raise HTTPException(
             status_code=400,
-            detail="Mídia muito longa. Limite atual: 30 minutos.",
+            detail="Midia muito longa. Limite atual: 30 minutos.",
         )
 
 
@@ -105,70 +133,129 @@ def find_first_file(directory: Path, extensions: set[str]) -> Path:
     return files[0]
 
 
-def download_video(url: str) -> dict:
+def ensure_file_size_allowed(path: Path) -> None:
+    if path.stat().st_size > MAX_MEDIA_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail="Arquivo gerado muito grande para retornar pela aplicacao.",
+        )
+
+
+def download_video(url: str) -> GeneratedMediaFile:
     normalized = validate_media_url(url)
     info = get_media_info(normalized)
     ensure_duration_allowed(info)
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir)
+    temp_path = Path(tempfile.mkdtemp(prefix="media-video-"))
+    ydl_opts = {
+        "quiet": True,
+        "no_warnings": True,
+        "noprogress": True,
+        "noplaylist": True,
+        "outtmpl": str(temp_path / "%(title).120s.%(ext)s"),
+        "format": "best[ext=mp4]/best",
+        "restrictfilenames": True,
+        "merge_output_format": "mp4",
+    }
 
-        ydl_opts = {
-            "quiet": True,
-            "noplaylist": True,
-            "outtmpl": str(temp_path / "%(title).120s.%(ext)s"),
-            "format": "best[ext=mp4]/best",
-            "restrictfilenames": True,
-        }
+    ffmpeg_location = resolve_ffmpeg_location()
+    if ffmpeg_location:
+        ydl_opts["ffmpeg_location"] = ffmpeg_location
 
-        try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([normalized])
-        except Exception:
-            raise HTTPException(
-                status_code=400,
-                detail="Não foi possível baixar a mídia informada.",
-            )
-
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([normalized])
         output_file = find_first_file(temp_path, {"mp4", "webm", "mkv", "mov"})
+        ensure_file_size_allowed(output_file)
+    except HTTPException:
+        cleanup_generated_media(temp_path)
+        raise
+    except Exception as exc:
+        cleanup_generated_media(temp_path)
+        raise HTTPException(
+            status_code=400,
+            detail=f"Nao foi possivel baixar a midia informada: {exc}",
+        )
 
-        mime_type = "video/mp4" if output_file.suffix.lower() == ".mp4" else "application/octet-stream"
+    mime_type = "video/mp4" if output_file.suffix.lower() == ".mp4" else "application/octet-stream"
 
-        return read_generated_file(output_file, mime_type)
+    return GeneratedMediaFile(output_file, mime_type, temp_path)
 
 
-def download_audio_mp3(url: str) -> dict:
+def download_audio_mp3(url: str) -> GeneratedMediaFile:
     normalized = validate_media_url(url)
     info = get_media_info(normalized)
     ensure_duration_allowed(info)
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir)
+    ffmpeg_location = resolve_ffmpeg_location()
 
-        ydl_opts = {
-            "quiet": True,
-            "noplaylist": True,
-            "outtmpl": str(temp_path / "%(title).120s.%(ext)s"),
-            "format": "bestaudio/best",
-            "restrictfilenames": True,
-            "postprocessors": [
-                {
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": "mp3",
-                    "preferredquality": "192",
-                }
-            ],
-        }
+    if not ffmpeg_location:
+        raise HTTPException(
+            status_code=500,
+            detail="FFmpeg nao encontrado. Instale FFmpeg ou a dependencia imageio-ffmpeg.",
+        )
 
-        try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([normalized])
-        except Exception:
-            raise HTTPException(
-                status_code=400,
-                detail="Não foi possível converter a mídia para MP3. Verifique se o FFmpeg está instalado.",
+    temp_path = Path(tempfile.mkdtemp(prefix="media-audio-"))
+    ydl_opts = {
+        "quiet": True,
+        "no_warnings": True,
+        "noprogress": True,
+        "noplaylist": True,
+        "outtmpl": str(temp_path / "%(title).120s.%(ext)s"),
+        "format": "bestaudio/best",
+        "restrictfilenames": True,
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([normalized])
+        source_file = find_first_file(
+            temp_path,
+            {"aac", "flac", "m4a", "mkv", "mov", "mp3", "mp4", "ogg", "opus", "wav", "webm"},
+        )
+
+        if source_file.suffix.lower() == ".mp3":
+            output_file = source_file
+        else:
+            output_file = source_file.with_suffix(".mp3")
+            subprocess.run(
+                [
+                    ffmpeg_location,
+                    "-y",
+                    "-i",
+                    str(source_file),
+                    "-vn",
+                    "-codec:a",
+                    "libmp3lame",
+                    "-b:a",
+                    "192k",
+                    str(output_file),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
             )
 
-        output_file = find_first_file(temp_path, {"mp3"})
+        ensure_file_size_allowed(output_file)
+    except subprocess.CalledProcessError as exc:
+        cleanup_generated_media(temp_path)
+        detail = exc.stderr.strip() or exc.stdout.strip() or str(exc)
 
-        return read_generated_file(output_file, "audio/mpeg")
+        if "Output file does not contain any stream" in detail:
+            detail = "A midia informada nao possui trilha de audio para converter."
+
+        raise HTTPException(
+            status_code=400,
+            detail=f"Nao foi possivel converter a midia para MP3 com FFmpeg: {detail}",
+        )
+    except HTTPException:
+        cleanup_generated_media(temp_path)
+        raise
+    except Exception as exc:
+        cleanup_generated_media(temp_path)
+        raise HTTPException(
+            status_code=400,
+            detail=f"Nao foi possivel converter a midia para MP3: {exc}",
+        )
+
+    return GeneratedMediaFile(output_file, "audio/mpeg", temp_path)
