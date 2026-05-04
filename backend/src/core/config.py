@@ -1,4 +1,24 @@
 import os
+from pathlib import Path
+
+
+def load_local_env() -> None:
+    env_path = Path(__file__).resolve().parents[2] / ".env"
+
+    if not env_path.exists():
+        return
+
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        cleaned = line.strip()
+
+        if not cleaned or cleaned.startswith("#") or "=" not in cleaned:
+            continue
+
+        key, value = cleaned.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+load_local_env()
 
 
 class Settings:
