@@ -91,7 +91,7 @@ async function copyResult() {
 </script>
 
 <template>
-  <section class="mx-auto max-w-5xl space-y-6">
+  <section class="tool-page">
     <div>
       <h2 class="text-3xl font-bold text-white">Markdown Tools</h2>
       <p class="mt-2 text-slate-400">
@@ -100,11 +100,11 @@ async function copyResult() {
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <form class="min-h-[620px] space-y-5 rounded-2xl border border-slate-800 bg-slate-900 p-5" @submit.prevent="processMarkdown">
+      <form class="min-h-[var(--tool-panel-min-height)] space-y-5 rounded-lg border border-white/10 bg-white/[0.045] p-5" @submit.prevent="processMarkdown">
         <div>
           <span class="text-sm font-medium text-slate-300">Ferramenta</span>
 
-          <div class="mt-2 grid grid-cols-2 gap-2 rounded-2xl border border-slate-800 bg-slate-950 p-2">
+          <div class="mt-2 grid grid-cols-2 gap-2 rounded-lg border border-white/10 bg-[#0b1020] p-2">
             <button
               v-for="option in [
                 { key: 'preview', label: 'Preview' },
@@ -114,10 +114,10 @@ async function copyResult() {
               ]"
               :key="option.key"
               type="button"
-              class="rounded-xl px-3 py-3 text-sm font-semibold transition"
+              class="rounded-md px-3 py-3 text-sm font-semibold transition"
               :class="mode === option.key
-                ? 'bg-cyan-400 text-slate-950'
-                : 'text-slate-300 hover:bg-slate-900 hover:text-white'"
+                ? 'bg-teal-300 text-slate-950'
+                : 'text-slate-300 hover:bg-white/[0.045] hover:text-white'"
               @click="mode = option.key as MarkdownMode; result = ''"
             >
               {{ option.label }}
@@ -131,7 +131,7 @@ async function copyResult() {
           <textarea
             v-model="content"
             rows="14"
-            class="mt-2 w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 font-mono text-sm text-white outline-none focus:border-cyan-400"
+            class="mt-2 w-full resize-none rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 font-mono text-sm text-white outline-none focus:border-teal-300"
           />
         </label>
 
@@ -141,7 +141,7 @@ async function copyResult() {
             <input
               v-model="headers"
               type="text"
-              class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+              class="mt-2 w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
             />
           </label>
 
@@ -150,7 +150,7 @@ async function copyResult() {
             <textarea
               v-model="rows"
               rows="10"
-              class="mt-2 w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 font-mono text-sm text-white outline-none focus:border-cyan-400"
+              class="mt-2 w-full resize-none rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 font-mono text-sm text-white outline-none focus:border-teal-300"
             />
           </label>
         </div>
@@ -161,47 +161,47 @@ async function copyResult() {
             <textarea
               v-model="listItems"
               rows="10"
-              class="mt-2 w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+              class="mt-2 w-full resize-none rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
             />
           </label>
 
-          <label class="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950 p-3 text-sm text-slate-300">
-            <input v-model="ordered" type="checkbox" class="h-4 w-4 accent-cyan-400" />
+          <label class="flex items-center gap-3 rounded-md border border-white/10 bg-[#0b1020] p-3 text-sm text-slate-300">
+            <input v-model="ordered" type="checkbox" class="h-4 w-4 accent-teal-300" />
             Lista ordenada
           </label>
         </div>
 
         <button
           type="submit"
-          class="w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60"
+          class="w-full rounded-md bg-teal-300 px-5 py-3 font-semibold text-slate-950 transition hover:bg-teal-200 disabled:opacity-60"
           :disabled="loading"
         >
           {{ loading ? 'Processando...' : 'Gerar resultado' }}
         </button>
 
-        <p v-if="error" class="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+        <p v-if="error" class="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
           {{ error }}
         </p>
       </form>
 
-      <div class="min-h-[620px] rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="min-h-[var(--tool-panel-min-height)] rounded-lg border border-white/10 bg-white/[0.045] p-5">
         <h3 class="text-lg font-semibold text-white">Resultado</h3>
 
         <div v-if="result" class="mt-4 space-y-4">
           <div
             v-if="mode === 'preview'"
-            class="prose prose-invert max-h-[450px] max-w-none overflow-auto rounded-xl border border-slate-800 bg-slate-950 p-4 text-slate-300"
+            class="prose prose-invert max-h-[450px] max-w-none overflow-auto rounded-md border border-white/10 bg-[#0b1020] p-4 text-slate-300"
             v-html="result"
           />
 
           <pre
             v-else
-            class="max-h-[450px] overflow-auto rounded-xl border border-slate-800 bg-slate-950 p-4 text-sm text-cyan-100"
+            class="max-h-[450px] overflow-auto rounded-md border border-white/10 bg-[#0b1020] p-4 text-sm text-teal-50"
           >{{ result }}</pre>
 
           <button
             type="button"
-            class="rounded-xl border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
+            class="rounded-md border border-teal-300 px-4 py-2 text-sm font-semibold text-teal-200 transition hover:bg-teal-300 hover:text-slate-950"
             @click="copyResult"
           >
             {{ copied ? 'Copiado!' : 'Copiar resultado' }}

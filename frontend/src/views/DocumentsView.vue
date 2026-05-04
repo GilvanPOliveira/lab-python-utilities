@@ -77,7 +77,7 @@ async function copyOnlyDigits() {
 </script>
 
 <template>
-  <section class="mx-auto max-w-5xl space-y-6">
+  <section class="tool-page">
     <div>
       <h2 class="text-3xl font-bold text-white">CPF/CNPJ</h2>
       <p class="mt-2 text-slate-400">
@@ -86,17 +86,17 @@ async function copyOnlyDigits() {
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <form class="min-h-[430px] space-y-5 rounded-2xl border border-slate-800 bg-slate-900 p-5" @submit.prevent="validateDocument">
+      <form class="min-h-[var(--tool-panel-min-height)] space-y-5 rounded-lg border border-white/10 bg-white/[0.045] p-5" @submit.prevent="validateDocument">
         <div>
           <span class="text-sm font-medium text-slate-300">Tipo de documento</span>
 
-          <div class="mt-2 grid grid-cols-2 gap-3 rounded-2xl border border-slate-800 bg-slate-950 p-2">
+          <div class="mt-2 grid grid-cols-2 gap-3 rounded-lg border border-white/10 bg-[#0b1020] p-2">
             <button
               type="button"
-              class="rounded-xl px-4 py-3 text-sm font-semibold transition"
+              class="rounded-md px-4 py-3 text-sm font-semibold transition"
               :class="documentType === 'cpf'
-                ? 'bg-cyan-400 text-slate-950'
-                : 'text-slate-300 hover:bg-slate-900 hover:text-white'"
+                ? 'bg-teal-300 text-slate-950'
+                : 'text-slate-300 hover:bg-white/[0.045] hover:text-white'"
               @click="documentType = 'cpf'"
             >
               CPF
@@ -104,10 +104,10 @@ async function copyOnlyDigits() {
 
             <button
               type="button"
-              class="rounded-xl px-4 py-3 text-sm font-semibold transition"
+              class="rounded-md px-4 py-3 text-sm font-semibold transition"
               :class="documentType === 'cnpj'
-                ? 'bg-cyan-400 text-slate-950'
-                : 'text-slate-300 hover:bg-slate-900 hover:text-white'"
+                ? 'bg-teal-300 text-slate-950'
+                : 'text-slate-300 hover:bg-white/[0.045] hover:text-white'"
               @click="documentType = 'cnpj'"
             >
               CNPJ
@@ -121,29 +121,29 @@ async function copyOnlyDigits() {
             v-model="value"
             type="text"
             placeholder="Digite com ou sem máscara"
-            class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+            class="mt-2 w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
           />
         </label>
 
         <button
           type="submit"
-          class="w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+          class="w-full rounded-md bg-teal-300 px-5 py-3 font-semibold text-slate-950 transition hover:bg-teal-200 disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="loading"
         >
           {{ loading ? 'Validando...' : `Validar ${documentType.toUpperCase()}` }}
         </button>
 
-        <p v-if="error" class="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+        <p v-if="error" class="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
           {{ error }}
         </p>
       </form>
 
-      <div class="min-h-[430px] rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="min-h-[var(--tool-panel-min-height)] rounded-lg border border-white/10 bg-white/[0.045] p-5">
         <h3 class="text-lg font-semibold text-white">Resultado</h3>
 
         <div v-if="result" class="mt-4 space-y-4">
           <div
-            class="rounded-xl border p-4"
+            class="rounded-md border p-4"
             :class="result.valid ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-red-500/30 bg-red-500/10'"
           >
             <p class="text-sm font-semibold" :class="result.valid ? 'text-emerald-300' : 'text-red-300'">
@@ -171,7 +171,7 @@ async function copyOnlyDigits() {
           <div v-if="result.valid" class="flex flex-wrap gap-3">
             <button
               type="button"
-              class="rounded-xl border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
+              class="rounded-md border border-teal-300 px-4 py-2 text-sm font-semibold text-teal-200 transition hover:bg-teal-300 hover:text-slate-950"
               @click="copyValidatedNumber"
             >
               {{ copiedFormatted ? 'Formatado copiado!' : 'Copiar formatado' }}
@@ -179,7 +179,7 @@ async function copyOnlyDigits() {
 
             <button
               type="button"
-              class="rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-cyan-400 hover:text-cyan-300"
+              class="rounded-md border border-white/10 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-teal-300 hover:text-teal-200"
               @click="copyOnlyDigits"
             >
               {{ copiedDigits ? 'Dígitos copiados!' : 'Copiar somente dígitos' }}
@@ -187,7 +187,7 @@ async function copyOnlyDigits() {
           </div>
 
           <p v-else class="text-sm text-slate-500">
-            As opções de copiar aparecem apenas quando o documento é válido.
+            As opções de copiar aparecem apenas quando o documento  válido.
           </p>
         </div>
 

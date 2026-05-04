@@ -97,7 +97,7 @@ function clearFields() {
 </script>
 
 <template>
-  <section class="mx-auto max-w-5xl space-y-6">
+  <section class="tool-page">
     <div>
       <h2 class="text-3xl font-bold text-white">Text Tools</h2>
       <p class="mt-2 text-slate-400">
@@ -106,19 +106,19 @@ function clearFields() {
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <div class="min-h-[520px] space-y-5 rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="min-h-[var(--tool-panel-min-height)] space-y-5 rounded-lg border border-white/10 bg-white/[0.045] p-5">
         <label class="block">
           <span class="text-sm font-medium text-slate-300">Texto de entrada</span>
           <textarea
             v-model="value"
-            class="mt-2 min-h-64 w-full resize-y rounded-xl border border-slate-700 bg-slate-950 p-4 text-slate-100 outline-none focus:border-cyan-400"
+            class="mt-2 min-h-64 w-full resize-y rounded-md border border-white/10 bg-[#0b1020] p-4 text-slate-100 outline-none focus:border-teal-300"
             placeholder="Digite seu texto"
           />
         </label>
 
         <div class="flex flex-wrap justify-center gap-3">
           <button
-            class="rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60"
+            class="rounded-md bg-teal-300 px-5 py-3 font-semibold text-slate-950 transition hover:bg-teal-200 disabled:opacity-60"
             :disabled="loading"
             @click="cleanText"
           >
@@ -126,7 +126,7 @@ function clearFields() {
           </button>
 
           <button
-            class="rounded-xl border border-cyan-400 px-5 py-3 font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950 disabled:opacity-60"
+            class="rounded-md border border-teal-300 px-5 py-3 font-semibold text-teal-200 transition hover:bg-teal-300 hover:text-slate-950 disabled:opacity-60"
             :disabled="loading"
             @click="convertText('upper')"
           >
@@ -134,7 +134,7 @@ function clearFields() {
           </button>
 
           <button
-            class="rounded-xl border border-cyan-400 px-5 py-3 font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950 disabled:opacity-60"
+            class="rounded-md border border-teal-300 px-5 py-3 font-semibold text-teal-200 transition hover:bg-teal-300 hover:text-slate-950 disabled:opacity-60"
             :disabled="loading"
             @click="convertText('lower')"
           >
@@ -142,7 +142,7 @@ function clearFields() {
           </button>
 
           <button
-            class="rounded-xl border border-cyan-400 px-5 py-3 font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950 disabled:opacity-60"
+            class="rounded-md border border-teal-300 px-5 py-3 font-semibold text-teal-200 transition hover:bg-teal-300 hover:text-slate-950 disabled:opacity-60"
             :disabled="loading"
             @click="convertText('title')"
           >
@@ -150,7 +150,7 @@ function clearFields() {
           </button>
 
           <button
-            class="rounded-xl border border-slate-700 px-5 py-3 font-semibold text-slate-300 transition hover:border-cyan-400 hover:text-white disabled:opacity-60"
+            class="rounded-md border border-white/10 px-5 py-3 font-semibold text-slate-300 transition hover:border-teal-300 hover:text-white disabled:opacity-60"
             :disabled="loading"
             @click="countText"
           >
@@ -158,31 +158,31 @@ function clearFields() {
           </button>
 
           <button
-            class="rounded-xl border border-slate-700 px-5 py-3 font-semibold text-slate-300 transition hover:border-red-400 hover:text-red-300"
+            class="rounded-md border border-white/10 px-5 py-3 font-semibold text-slate-300 transition hover:border-red-400 hover:text-red-300"
             @click="clearFields"
           >
             Limpar campos
           </button>
         </div>
 
-        <p v-if="error" class="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+        <p v-if="error" class="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
           {{ error }}
         </p>
       </div>
 
-      <div class="min-h-[520px] rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="min-h-[var(--tool-panel-min-height)] rounded-lg border border-white/10 bg-white/[0.045] p-5">
         <h3 class="text-lg font-semibold text-white">Resultado</h3>
 
         <div v-if="result" class="mt-4 space-y-4">
-          <div class="max-h-96 overflow-auto rounded-xl border border-slate-800 bg-slate-950 p-4">
-            <p class="whitespace-pre-wrap break-words text-sm leading-6 text-cyan-100">
+          <div class="max-h-96 overflow-auto rounded-md border border-white/10 bg-[#0b1020] p-4">
+            <p class="whitespace-pre-wrap break-words text-sm leading-6 text-teal-50">
               {{ result }}
             </p>
           </div>
 
           <button
             type="button"
-            class="rounded-xl border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
+            class="rounded-md border border-teal-300 px-4 py-2 text-sm font-semibold text-teal-200 transition hover:bg-teal-300 hover:text-slate-950"
             @click="copyResult"
           >
             {{ copied ? 'Resultado copiado!' : 'Copiar resultado' }}
@@ -190,24 +190,24 @@ function clearFields() {
         </div>
 
         <div v-else-if="count" class="mt-4 grid gap-3 sm:grid-cols-2">
-          <div class="rounded-xl border border-slate-800 bg-slate-950 p-4">
+          <div class="rounded-md border border-white/10 bg-[#0b1020] p-4">
             <p class="text-xs text-slate-500">Caracteres</p>
-            <p class="mt-1 text-2xl font-bold text-cyan-300">{{ count.characters }}</p>
+            <p class="mt-1 text-2xl font-bold text-teal-200">{{ count.characters }}</p>
           </div>
 
-          <div class="rounded-xl border border-slate-800 bg-slate-950 p-4">
+          <div class="rounded-md border border-white/10 bg-[#0b1020] p-4">
             <p class="text-xs text-slate-500">Sem espaços</p>
-            <p class="mt-1 text-2xl font-bold text-cyan-300">{{ count.characters_without_spaces }}</p>
+            <p class="mt-1 text-2xl font-bold text-teal-200">{{ count.characters_without_spaces }}</p>
           </div>
 
-          <div class="rounded-xl border border-slate-800 bg-slate-950 p-4">
+          <div class="rounded-md border border-white/10 bg-[#0b1020] p-4">
             <p class="text-xs text-slate-500">Palavras</p>
-            <p class="mt-1 text-2xl font-bold text-cyan-300">{{ count.words }}</p>
+            <p class="mt-1 text-2xl font-bold text-teal-200">{{ count.words }}</p>
           </div>
 
-          <div class="rounded-xl border border-slate-800 bg-slate-950 p-4">
+          <div class="rounded-md border border-white/10 bg-[#0b1020] p-4">
             <p class="text-xs text-slate-500">Linhas</p>
-            <p class="mt-1 text-2xl font-bold text-cyan-300">{{ count.lines }}</p>
+            <p class="mt-1 text-2xl font-bold text-teal-200">{{ count.lines }}</p>
           </div>
         </div>
 

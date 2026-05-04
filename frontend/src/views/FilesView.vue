@@ -64,7 +64,7 @@ async function copyMetadata() {
 </script>
 
 <template>
-  <section class="mx-auto max-w-5xl space-y-6">
+  <section class="tool-page">
     <div>
       <h2 class="text-3xl font-bold text-white">File Tools</h2>
       <p class="mt-2 text-slate-400">
@@ -73,7 +73,7 @@ async function copyMetadata() {
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <div class="min-h-[480px] space-y-5 rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="min-h-[var(--tool-panel-min-height)] space-y-5 rounded-lg border border-white/10 bg-white/[0.045] p-5">
         <div>
           <h3 class="text-lg font-semibold text-white">Extrair metadados</h3>
           <p class="mt-1 text-sm text-slate-400">
@@ -83,24 +83,24 @@ async function copyMetadata() {
 
         <input
           type="file"
-          class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none file:mr-4 file:rounded-lg file:border-0 file:bg-cyan-400 file:px-3 file:py-2 file:font-semibold file:text-slate-950"
+          class="w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-sm text-slate-300 outline-none"
           @change="handleFile"
         />
 
         <button
           type="button"
-          class="w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60"
+          class="w-full rounded-md bg-teal-300 px-5 py-3 font-semibold text-slate-950 transition hover:bg-teal-200 disabled:opacity-60"
           :disabled="loading"
           @click="extractMetadata"
         >
           {{ loading ? 'Lendo arquivo...' : 'Extrair metadados' }}
         </button>
 
-        <p v-if="error" class="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+        <p v-if="error" class="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
           {{ error }}
         </p>
 
-        <div v-if="selectedFile" class="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+        <div v-if="selectedFile" class="rounded-lg border border-white/10 bg-[#0b1020] p-4">
           <h4 class="text-sm font-semibold text-white">Arquivo selecionado</h4>
           <div class="mt-3 grid gap-2 text-sm text-slate-300">
             <p class="break-all"><span class="text-slate-500">Nome:</span> {{ selectedFile.name }}</p>
@@ -110,18 +110,18 @@ async function copyMetadata() {
         </div>
       </div>
 
-      <div class="min-h-[480px] rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="min-h-[var(--tool-panel-min-height)] rounded-lg border border-white/10 bg-white/[0.045] p-5">
         <h3 class="text-lg font-semibold text-white">Resultado</h3>
 
         <div v-if="metadata" class="mt-4 space-y-4">
-          <div class="rounded-2xl border border-cyan-400/30 bg-cyan-400/10 p-4">
-            <p class="text-sm text-cyan-100">
+          <div class="rounded-lg border border-teal-300/30 bg-teal-300/10 p-4">
+            <p class="text-sm text-teal-50">
               Arquivo lido:
-              <span class="font-mono text-cyan-300">{{ metadata.filename }}</span>
+              <span class="font-mono text-teal-200">{{ metadata.filename }}</span>
             </p>
           </div>
 
-          <div class="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+          <div class="rounded-lg border border-white/10 bg-[#0b1020] p-4">
             <div class="grid gap-2 text-sm text-slate-300">
               <p><span class="text-slate-500">Extensão:</span> {{ metadata.extension || 'sem extensão' }}</p>
               <p><span class="text-slate-500">Tipo:</span> {{ metadata.mime_type || 'não identificado' }}</p>
@@ -135,7 +135,7 @@ async function copyMetadata() {
 
           <button
             type="button"
-            class="rounded-xl border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
+            class="rounded-md border border-teal-300 px-4 py-2 text-sm font-semibold text-teal-200 transition hover:bg-teal-300 hover:text-slate-950"
             @click="copyMetadata"
           >
             {{ copied ? 'Metadados copiados!' : 'Copiar metadados' }}

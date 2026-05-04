@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { api } from '../services/api'
+import BaseNumberInput from '../components/BaseNumberInput.vue'
 
 type ColorMode = 'hex' | 'rgb' | 'hsl' | 'palette'
 
@@ -88,7 +89,7 @@ async function copyText(value: string, key: string) {
 </script>
 
 <template>
-  <section class="mx-auto max-w-5xl space-y-6">
+  <section class="tool-page">
     <div>
       <h2 class="text-3xl font-bold text-white">Color Tools</h2>
       <p class="mt-2 text-slate-400">
@@ -97,11 +98,11 @@ async function copyText(value: string, key: string) {
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <form class="min-h-[560px] space-y-5 rounded-2xl border border-slate-800 bg-slate-900 p-5" @submit.prevent="processColor">
+      <form class="min-h-[var(--tool-panel-min-height)] space-y-5 rounded-lg border border-white/10 bg-white/[0.045] p-5" @submit.prevent="processColor">
         <div>
           <span class="text-sm font-medium text-slate-300">Ferramenta</span>
 
-          <div class="mt-2 grid grid-cols-2 gap-2 rounded-2xl border border-slate-800 bg-slate-950 p-2">
+          <div class="mt-2 grid grid-cols-2 gap-2 rounded-lg border border-white/10 bg-[#0b1020] p-2">
             <button
               v-for="option in [
                 { key: 'hex', label: 'HEX' },
@@ -111,10 +112,10 @@ async function copyText(value: string, key: string) {
               ]"
               :key="option.key"
               type="button"
-              class="rounded-xl px-3 py-3 text-sm font-semibold transition"
+              class="rounded-md px-3 py-3 text-sm font-semibold transition"
               :class="mode === option.key
-                ? 'bg-cyan-400 text-slate-950'
-                : 'text-slate-300 hover:bg-slate-900 hover:text-white'"
+                ? 'bg-teal-300 text-slate-950'
+                : 'text-slate-300 hover:bg-white/[0.045] hover:text-white'"
               @click="mode = option.key as ColorMode; result = null"
             >
               {{ option.label }}
@@ -129,88 +130,66 @@ async function copyText(value: string, key: string) {
             <input
               v-model="hexColor"
               type="color"
-              class="h-12 w-16 rounded-xl border border-slate-700 bg-slate-950"
+              class="h-12 w-16 rounded-md border border-white/10 bg-[#0b1020]"
             />
 
             <input
               v-model="hexColor"
               type="text"
               placeholder="#22D3EE"
-              class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+              class="w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
             />
           </div>
         </label>
 
         <div v-if="mode === 'rgb'" class="grid gap-3 sm:grid-cols-3">
-          <label class="block">
-            <span class="text-sm font-medium text-slate-300">R</span>
-            <input v-model.number="r" type="number" min="0" max="255" class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400" />
-          </label>
-
-          <label class="block">
-            <span class="text-sm font-medium text-slate-300">G</span>
-            <input v-model.number="g" type="number" min="0" max="255" class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400" />
-          </label>
-
-          <label class="block">
-            <span class="text-sm font-medium text-slate-300">B</span>
-            <input v-model.number="b" type="number" min="0" max="255" class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400" />
-          </label>
+          <BaseNumberInput v-model="r" label="R" :min="0" :max="255" :step="1" />
+          <BaseNumberInput v-model="g" label="G" :min="0" :max="255" :step="1" />
+          <BaseNumberInput v-model="b" label="B" :min="0" :max="255" :step="1" />
         </div>
 
         <div v-if="mode === 'hsl'" class="grid gap-3 sm:grid-cols-3">
-          <label class="block">
-            <span class="text-sm font-medium text-slate-300">H</span>
-            <input v-model.number="h" type="number" min="0" max="360" class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400" />
-          </label>
-
-          <label class="block">
-            <span class="text-sm font-medium text-slate-300">S</span>
-            <input v-model.number="s" type="number" min="0" max="100" class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400" />
-          </label>
-
-          <label class="block">
-            <span class="text-sm font-medium text-slate-300">L</span>
-            <input v-model.number="l" type="number" min="0" max="100" class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400" />
-          </label>
+          <BaseNumberInput v-model="h" label="H" :min="0" :max="360" :step="1" />
+          <BaseNumberInput v-model="s" label="S" :min="0" :max="100" :step="1" suffix="%" />
+          <BaseNumberInput v-model="l" label="L" :min="0" :max="100" :step="1" suffix="%" />
         </div>
 
         <button
           type="submit"
-          class="w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60"
+          class="w-full rounded-md bg-teal-300 px-5 py-3 font-semibold text-slate-950 transition hover:bg-teal-200 disabled:opacity-60"
           :disabled="loading"
         >
           {{ loading ? 'Processando...' : 'Processar cor' }}
         </button>
 
-        <p v-if="error" class="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+        <p v-if="error" class="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
           {{ error }}
         </p>
       </form>
 
-      <div class="min-h-[560px] rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="min-h-[var(--tool-panel-min-height)] rounded-lg border border-white/10 bg-white/[0.045] p-5">
         <h3 class="text-lg font-semibold text-white">Resultado</h3>
 
         <div v-if="resultMain" class="mt-5 space-y-4">
           <div
-            class="h-32 rounded-2xl border border-slate-800"
+            class="h-32 rounded-lg border border-white/10"
             :style="{ backgroundColor: resultMain.hex }"
           />
 
           <div class="grid gap-3">
-            <button class="rounded-xl border border-slate-800 bg-slate-950 p-4 text-left" @click="copyText(resultMain.hex, 'hex')">
+            <button class="rounded-md border border-white/10 bg-[#0b1020] p-4 text-left" @click="copyText(resultMain.hex, 'hex')">
               <span class="text-xs text-slate-500">HEX</span>
-              <p class="font-mono text-cyan-300">{{ copied === 'hex' ? 'Copiado!' : resultMain.hex }}</p>
+              <p class="font-mono text-teal-200">{{ copied === 'hex' ? 'Copiado!' : resultMain.hex }}</p>
             </button>
 
-            <button class="rounded-xl border border-slate-800 bg-slate-950 p-4 text-left" @click="copyText(resultMain.rgb, 'rgb')">
+            <button class="rounded-md border border-white/10 bg-[#0b1020] p-4 text-left" @click="copyText(resultMain.rgb, 'rgb')">
               <span class="text-xs text-slate-500">RGB</span>
-              <p class="font-mono text-cyan-300">{{ copied === 'rgb' ? 'Copiado!' : resultMain.rgb }}</p>
+              <p class="font-mono text-teal-200">{{ copied === 'rgb' ? 'Copiado!' : resultMain.rgb }}</p>
             </button>
 
-            <button class="rounded-xl border border-slate-800 bg-slate-950 p-4 text-left" @click="copyText(resultMain.hsl, 'hsl')">
+            <button class="rounded-md border border-white/10 bg-[#0b1020] p-4 text-left" @click="copyText(resultMain.hsl, 'hsl')">
               <span class="text-xs text-slate-500">HSL</span>
-              <p class="font-mono text-cyan-300">{{ copied === 'hsl' ? 'Copiado!' : resultMain.hsl }}</p>
+              <p class="font-mono text-teal-200">{{ copied === 'hsl' ? 'Copiado!' : resultMain.hsl }}</p>
             </button>
           </div>
 
@@ -221,7 +200,7 @@ async function copyText(value: string, key: string) {
               <button
                 v-for="color in [...result.darker, ...result.lighter]"
                 :key="color.hex"
-                class="h-20 rounded-xl border border-slate-800"
+                class="h-20 rounded-md border border-white/10"
                 :style="{ backgroundColor: color.hex }"
                 @click="copyText(color.hex, color.hex)"
               />

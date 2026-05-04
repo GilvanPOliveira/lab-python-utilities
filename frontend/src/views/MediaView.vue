@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { api } from '../services/api'
 
 type MediaMode = 'info' | 'download-video' | 'download-audio'
@@ -10,11 +10,7 @@ const url = ref('')
 const result = ref<any | null>(null)
 const error = ref('')
 const loading = ref(false)
-
-const fileUrl = computed(() => {
-  if (!result.value?.content_base64) return ''
-  return `data:${result.value.mime_type};base64,${result.value.content_base64}`
-})
+const fileUrl = ref('')
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`
@@ -22,19 +18,62 @@ function formatBytes(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`
 }
 
+function clearFileUrl() {
+  if (!fileUrl.value) return
+  URL.revokeObjectURL(fileUrl.value)
+  fileUrl.value = ''
+}
+
+async function extractErrorDetail(err: any) {
+  const data = err.response?.data
+
+  if (data instanceof Blob) {
+    try {
+      const parsed = JSON.parse(await data.text())
+      return parsed.detail
+    } catch {
+      return ''
+    }
+  }
+
+  return data?.detail
+}
+
+function getFilenameFromHeaders(headers: any) {
+  const contentDisposition = headers['content-disposition'] || ''
+  const filenameMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)|filename="?([^"]+)"?/)
+  return decodeURIComponent(filenameMatch?.[1] || filenameMatch?.[2] || 'media-download')
+}
+
 async function processMedia() {
+  clearFileUrl()
   result.value = null
   error.value = ''
   loading.value = true
 
   try {
-    const response = await api.post(`/media/${mode.value}`, {
-      url: url.value,
-    })
+    const response = await api.post(
+      `/media/${mode.value}`,
+      { url: url.value },
+      mode.value === 'info' ? undefined : { responseType: 'blob' },
+    )
 
-    result.value = response.data
+    if (mode.value === 'info') {
+      result.value = response.data
+      return
+    }
+
+    const blob = response.data as Blob
+    fileUrl.value = URL.createObjectURL(blob)
+    result.value = {
+      filename: getFilenameFromHeaders(response.headers),
+      mime_type: blob.type || response.headers['content-type'] || 'application/octet-stream',
+      size_bytes: blob.size,
+      is_file: true,
+    }
   } catch (err: any) {
-    error.value = err.response?.data?.detail || 'Não foi possível processar a mídia.'
+    const detail = await extractErrorDetail(err)
+    error.value = detail || 'Não foi possível processar a mídia.'
   } finally {
     loading.value = false
   }
@@ -50,10 +89,17 @@ function downloadFile() {
   link.click()
   document.body.removeChild(link)
 }
+
+function changeMode(nextMode: MediaMode) {
+  mode.value = nextMode
+  result.value = null
+  error.value = ''
+  clearFileUrl()
+}
 </script>
 
 <template>
-  <section class="mx-auto max-w-5xl space-y-6">
+  <section class="tool-page">
     <div>
       <h2 class="text-3xl font-bold text-white">Mídia pessoal/autorizada</h2>
       <p class="mt-2 text-slate-400">
@@ -62,11 +108,11 @@ function downloadFile() {
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <form class="min-h-[560px] space-y-5 rounded-2xl border border-slate-800 bg-slate-900 p-5" @submit.prevent="processMedia">
+      <form class="min-h-[var(--tool-panel-min-height)] space-y-5 rounded-lg border border-white/10 bg-white/[0.045] p-5" @submit.prevent="processMedia">
         <div>
           <span class="text-sm font-medium text-slate-300">Ferramenta</span>
 
-          <div class="mt-2 grid gap-2 rounded-2xl border border-slate-800 bg-slate-950 p-2 sm:grid-cols-3">
+          <div class="mt-2 grid gap-2 rounded-lg border border-white/10 bg-[#0b1020] p-2 sm:grid-cols-3">
             <button
               v-for="option in [
                 { key: 'info', label: 'Info' },
@@ -75,11 +121,11 @@ function downloadFile() {
               ]"
               :key="option.key"
               type="button"
-              class="rounded-xl px-3 py-3 text-sm font-semibold transition"
+              class="rounded-md px-3 py-3 text-sm font-semibold transition"
               :class="mode === option.key
-                ? 'bg-cyan-400 text-slate-950'
-                : 'text-slate-300 hover:bg-slate-900 hover:text-white'"
-              @click="mode = option.key as MediaMode; result = null; error = ''"
+                ? 'bg-teal-300 text-slate-950'
+                : 'text-slate-300 hover:bg-white/[0.045] hover:text-white'"
+              @click="changeMode(option.key as MediaMode)"
             >
               {{ option.label }}
             </button>
@@ -92,36 +138,36 @@ function downloadFile() {
             v-model="url"
             rows="6"
             placeholder="Cole a URL do seu vídeo, Reel autorizado ou mídia livre"
-            class="mt-2 w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+            class="mt-2 w-full resize-none rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
           />
         </label>
 
         <button
           type="submit"
-          class="w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60"
+          class="w-full rounded-md bg-teal-300 px-5 py-3 font-semibold text-slate-950 transition hover:bg-teal-200 disabled:opacity-60"
           :disabled="loading"
         >
           {{ loading ? 'Processando...' : 'Processar mídia' }}
         </button>
 
-        <p class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-5 text-amber-200">
-          Use apenas com conteúdos próprios, autorizados ou livres de direitos. Para MP3, o FFmpeg precisa estar instalado.
+        <p class="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-5 text-amber-200">
+          Use apenas com conteúdos próprios, autorizados ou livres de direitos. Para MP3, o backend usa FFmpeg do sistema ou imageio-ffmpeg.
         </p>
 
-        <p v-if="error" class="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+        <p v-if="error" class="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
           {{ error }}
         </p>
       </form>
 
-      <div class="min-h-[560px] rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="min-h-[var(--tool-panel-min-height)] rounded-lg border border-white/10 bg-white/[0.045] p-5">
         <h3 class="text-lg font-semibold text-white">Resultado</h3>
 
         <div v-if="result" class="mt-4 space-y-4">
-          <template v-if="result.content_base64">
-            <div class="rounded-2xl border border-cyan-400/30 bg-cyan-400/10 p-4">
-              <p class="break-all text-sm text-cyan-100">
+          <template v-if="result.is_file">
+            <div class="rounded-lg border border-teal-300/30 bg-teal-300/10 p-4">
+              <p class="break-all text-sm text-teal-50">
                 Arquivo:
-                <span class="font-mono text-cyan-300">{{ result.filename }}</span>
+                <span class="font-mono text-teal-200">{{ result.filename }}</span>
               </p>
 
               <p class="mt-2 text-sm text-slate-300">
@@ -131,7 +177,7 @@ function downloadFile() {
 
             <button
               type="button"
-              class="rounded-xl border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
+              class="rounded-md border border-teal-300 px-4 py-2 text-sm font-semibold text-teal-200 transition hover:bg-teal-300 hover:text-slate-950"
               @click="downloadFile"
             >
               Download
@@ -139,18 +185,18 @@ function downloadFile() {
           </template>
 
           <template v-else>
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+            <div class="rounded-lg border border-white/10 bg-[#0b1020] p-4">
               <img
                 v-if="result.thumbnail"
                 :src="result.thumbnail"
                 alt="Thumbnail"
-                class="mb-4 max-h-60 w-full rounded-xl object-cover"
+                class="mb-4 max-h-60 w-full rounded-md object-cover"
               />
 
               <div class="grid gap-2 text-sm text-slate-300">
                 <p class="break-all"><span class="text-slate-500">Título:</span> {{ result.title }}</p>
                 <p><span class="text-slate-500">Autor:</span> {{ result.uploader || 'não identificado' }}</p>
-                <p><span class="text-slate-500">Duração:</span> {{ result.duration || 'não informada' }} segundos</p>
+                <p><span class="text-slate-500">Duracao:</span> {{ result.duration || 'não informada' }} segundos</p>
                 <p class="break-all"><span class="text-slate-500">URL:</span> {{ result.webpage_url }}</p>
               </div>
             </div>

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { api } from '../services/api'
+import BaseNumberInput from '../components/BaseNumberInput.vue'
 
 type ConversionCategory = 'px-rem' | 'storage' | 'temperature' | 'length' | 'mass' | 'area' | 'volume'
-type FormulaType = 'percentage_of' | 'percentage_change' | 'rule_of_three' | 'bmi'
+type FórmulaType = 'percentage_of' | 'percentage_change' | 'rule_of_three' | 'bmi'
 
 const category = ref<ConversionCategory>('px-rem')
 const fromUnit = ref('px')
@@ -12,8 +13,8 @@ const value = ref(16)
 const baseFontSize = ref(16)
 const conversionResult = ref<any | null>(null)
 
-const formulaType = ref<FormulaType>('percentage_of')
-const formulaValues = ref({
+const fórmulaType = ref<FórmulaType>('percentage_of')
+const fórmulaValues = ref({
   percentage: 10,
   total: 100,
   initial: 100,
@@ -24,7 +25,7 @@ const formulaValues = ref({
   weight: 70,
   height: 1.75,
 })
-const formulaResult = ref<any | null>(null)
+const fórmulaResult = ref<any | null>(null)
 
 const error = ref('')
 const copied = ref(false)
@@ -40,7 +41,7 @@ const unitsByCategory = {
   volume: ['ml', 'l', 'm3'],
 }
 
-const formulaLabels = {
+const fórmulaLabels = {
   percentage_of: 'Porcentagem de um valor',
   percentage_change: 'Variação percentual',
   rule_of_three: 'Regra de três',
@@ -53,13 +54,13 @@ const conversionCopyText = computed(() => {
   return `${conversionResult.value.input_value} ${conversionResult.value.from_unit} = ${conversionResult.value.result} ${conversionResult.value.to_unit}`
 })
 const formulaCopyText = computed(() => {
-  if (!formulaResult.value) return ''
-  return `${formulaResult.value.expression}`
+  if (!fórmulaResult.value) return ''
+  return `${fórmulaResult.value.expression}`
 })
 
 function resetResults() {
   conversionResult.value = null
-  formulaResult.value = null
+  fórmulaResult.value = null
   error.value = ''
   copied.value = false
 }
@@ -93,47 +94,47 @@ async function convertUnit() {
   }
 }
 
-function buildFormulaPayload() {
-  if (formulaType.value === 'percentage_of') {
+function buildFórmulaPayload() {
+  if (fórmulaType.value === 'percentage_of') {
     return {
-      percentage: formulaValues.value.percentage,
-      total: formulaValues.value.total,
+      percentage: fórmulaValues.value.percentage,
+      total: fórmulaValues.value.total,
     }
   }
 
-  if (formulaType.value === 'percentage_change') {
+  if (fórmulaType.value === 'percentage_change') {
     return {
-      initial: formulaValues.value.initial,
-      final: formulaValues.value.final,
+      initial: fórmulaValues.value.initial,
+      final: fórmulaValues.value.final,
     }
   }
 
-  if (formulaType.value === 'rule_of_three') {
+  if (fórmulaType.value === 'rule_of_three') {
     return {
-      a: formulaValues.value.a,
-      b: formulaValues.value.b,
-      c: formulaValues.value.c,
+      a: fórmulaValues.value.a,
+      b: fórmulaValues.value.b,
+      c: fórmulaValues.value.c,
     }
   }
 
   return {
-    weight: formulaValues.value.weight,
-    height: formulaValues.value.height,
+    weight: fórmulaValues.value.weight,
+    height: fórmulaValues.value.height,
   }
 }
 
-async function calculateFormula() {
+async function calculateFórmula() {
   error.value = ''
-  formulaResult.value = null
+  fórmulaResult.value = null
   loading.value = true
 
   try {
-    const response = await api.post('/units/formula', {
-      formula_type: formulaType.value,
-      values: buildFormulaPayload(),
+    const response = await api.post('/units/fórmula', {
+      fórmula_type: fórmulaType.value,
+      values: buildFórmulaPayload(),
     })
 
-    formulaResult.value = response.data
+    fórmulaResult.value = response.data
   } catch (err: any) {
     error.value = err.response?.data?.detail || 'Não foi possível calcular a fórmula.'
   } finally {
@@ -154,7 +155,7 @@ async function copyText(text: string) {
 </script>
 
 <template>
-  <section class="mx-auto max-w-5xl space-y-6">
+  <section class="tool-page">
     <div>
       <h2 class="text-3xl font-bold text-white">Unidades e Fórmulas</h2>
       <p class="mt-2 text-slate-400">
@@ -162,12 +163,12 @@ async function copyText(text: string) {
       </p>
     </div>
 
-    <p v-if="error" class="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+    <p v-if="error" class="rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
       {{ error }}
     </p>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <div class="min-h-[560px] rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="min-h-[var(--tool-panel-min-height)] rounded-lg border border-white/10 bg-white/[0.045] p-5">
         <h3 class="text-lg font-semibold text-white">Conversor de unidades</h3>
 
         <form class="mt-5 space-y-4" @submit.prevent="convertUnit">
@@ -176,7 +177,7 @@ async function copyText(text: string) {
 
             <select
               v-model="category"
-              class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+              class="mt-2 w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
               @change="changeCategory"
             >
               <option value="px-rem">PX / REM</option>
@@ -189,16 +190,7 @@ async function copyText(text: string) {
             </select>
           </label>
 
-          <label class="block">
-            <span class="text-sm font-medium text-slate-300">Valor</span>
-
-            <input
-              v-model.number="value"
-              type="number"
-              step="any"
-              class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-            />
-          </label>
+          <BaseNumberInput v-model="value" label="Valor" :step="1" />
 
           <div class="grid gap-3 sm:grid-cols-2">
             <label class="block">
@@ -206,7 +198,7 @@ async function copyText(text: string) {
 
               <select
                 v-model="fromUnit"
-                class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+                class="mt-2 w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
               >
                 <option v-for="unit in currentUnits" :key="unit" :value="unit">
                   {{ unit }}
@@ -219,7 +211,7 @@ async function copyText(text: string) {
 
               <select
                 v-model="toUnit"
-                class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+                class="mt-2 w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
               >
                 <option v-for="unit in currentUnits" :key="unit" :value="unit">
                   {{ unit }}
@@ -228,21 +220,11 @@ async function copyText(text: string) {
             </label>
           </div>
 
-          <label v-if="category === 'px-rem'" class="block">
-            <span class="text-sm font-medium text-slate-300">Base font-size</span>
-
-            <input
-              v-model.number="baseFontSize"
-              type="number"
-              min="1"
-              step="any"
-              class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-            />
-          </label>
+          <BaseNumberInput v-if="category === 'px-rem'" v-model="baseFontSize" label="Base font-size" :min="1" :step="1" suffix="px" />
 
           <button
             type="submit"
-            class="w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60"
+            class="w-full rounded-md bg-teal-300 px-5 py-3 font-semibold text-slate-950 transition hover:bg-teal-200 disabled:opacity-60"
             :disabled="loading"
           >
             {{ loading ? 'Convertendo...' : 'Converter' }}
@@ -250,20 +232,20 @@ async function copyText(text: string) {
         </form>
 
         <div v-if="conversionResult" class="mt-5 space-y-4">
-          <div class="rounded-2xl border border-cyan-400/30 bg-cyan-400/10 p-5">
-            <p class="text-sm text-cyan-200">Resultado</p>
-            <p class="mt-2 break-all font-mono text-2xl font-bold text-cyan-300">
+          <div class="rounded-lg border border-teal-300/30 bg-teal-300/10 p-5">
+            <p class="text-sm text-teal-200">Resultado</p>
+            <p class="mt-2 break-all font-mono text-2xl font-bold text-teal-200">
               {{ conversionResult.result }} {{ conversionResult.to_unit }}
             </p>
           </div>
 
-          <p class="rounded-xl border border-slate-800 bg-slate-950 p-4 text-sm text-slate-300">
-            {{ conversionResult.formula }}
+          <p class="rounded-md border border-white/10 bg-[#0b1020] p-4 text-sm text-slate-300">
+            {{ conversionResult.fórmula }}
           </p>
 
           <button
             type="button"
-            class="rounded-xl border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
+            class="rounded-md border border-teal-300 px-4 py-2 text-sm font-semibold text-teal-200 transition hover:bg-teal-300 hover:text-slate-950"
             @click="copyText(conversionCopyText)"
           >
             {{ copied ? 'Copiado!' : 'Copiar resultado' }}
@@ -271,17 +253,17 @@ async function copyText(text: string) {
         </div>
       </div>
 
-      <div class="min-h-[560px] rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="min-h-[var(--tool-panel-min-height)] rounded-lg border border-white/10 bg-white/[0.045] p-5">
         <h3 class="text-lg font-semibold text-white">Fórmulas rápidas</h3>
 
-        <form class="mt-5 space-y-4" @submit.prevent="calculateFormula">
+        <form class="mt-5 space-y-4" @submit.prevent="calculateFórmula">
           <label class="block">
             <span class="text-sm font-medium text-slate-300">Fórmula</span>
 
             <select
-              v-model="formulaType"
-              class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-              @change="formulaResult = null"
+              v-model="fórmulaType"
+              class="mt-2 w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
+              @change="fórmulaResult = null"
             >
               <option value="percentage_of">Porcentagem de um valor</option>
               <option value="percentage_change">Variação percentual</option>
@@ -290,128 +272,51 @@ async function copyText(text: string) {
             </select>
           </label>
 
-          <div v-if="formulaType === 'percentage_of'" class="grid gap-3 sm:grid-cols-2">
-            <label class="block">
-              <span class="text-sm font-medium text-slate-300">Porcentagem</span>
-              <input
-                v-model.number="formulaValues.percentage"
-                type="number"
-                step="any"
-                class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-              />
-            </label>
-
-            <label class="block">
-              <span class="text-sm font-medium text-slate-300">Total</span>
-              <input
-                v-model.number="formulaValues.total"
-                type="number"
-                step="any"
-                class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-              />
-            </label>
+          <div v-if="fórmulaType === 'percentage_of'" class="grid gap-3 sm:grid-cols-2">
+            <BaseNumberInput v-model="fórmulaValues.percentage" label="Porcentagem" :step="1" suffix="%" />
+            <BaseNumberInput v-model="fórmulaValues.total" label="Total" :step="1" />
           </div>
 
-          <div v-if="formulaType === 'percentage_change'" class="grid gap-3 sm:grid-cols-2">
-            <label class="block">
-              <span class="text-sm font-medium text-slate-300">Inicial</span>
-              <input
-                v-model.number="formulaValues.initial"
-                type="number"
-                step="any"
-                class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-              />
-            </label>
-
-            <label class="block">
-              <span class="text-sm font-medium text-slate-300">Final</span>
-              <input
-                v-model.number="formulaValues.final"
-                type="number"
-                step="any"
-                class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-              />
-            </label>
+          <div v-if="fórmulaType === 'percentage_change'" class="grid gap-3 sm:grid-cols-2">
+            <BaseNumberInput v-model="fórmulaValues.initial" label="Inicial" :step="1" />
+            <BaseNumberInput v-model="fórmulaValues.final" label="Final" :step="1" />
           </div>
 
-          <div v-if="formulaType === 'rule_of_three'" class="grid gap-3 sm:grid-cols-3">
-            <label class="block">
-              <span class="text-sm font-medium text-slate-300">A</span>
-              <input
-                v-model.number="formulaValues.a"
-                type="number"
-                step="any"
-                class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-              />
-            </label>
-
-            <label class="block">
-              <span class="text-sm font-medium text-slate-300">B</span>
-              <input
-                v-model.number="formulaValues.b"
-                type="number"
-                step="any"
-                class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-              />
-            </label>
-
-            <label class="block">
-              <span class="text-sm font-medium text-slate-300">C</span>
-              <input
-                v-model.number="formulaValues.c"
-                type="number"
-                step="any"
-                class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-              />
-            </label>
+          <div v-if="fórmulaType === 'rule_of_three'" class="grid gap-3 sm:grid-cols-3">
+            <BaseNumberInput v-model="fórmulaValues.a" label="A" :step="1" />
+            <BaseNumberInput v-model="fórmulaValues.b" label="B" :step="1" />
+            <BaseNumberInput v-model="fórmulaValues.c" label="C" :step="1" />
           </div>
 
-          <div v-if="formulaType === 'bmi'" class="grid gap-3 sm:grid-cols-2">
-            <label class="block">
-              <span class="text-sm font-medium text-slate-300">Peso kg</span>
-              <input
-                v-model.number="formulaValues.weight"
-                type="number"
-                step="any"
-                class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-              />
-            </label>
-
-            <label class="block">
-              <span class="text-sm font-medium text-slate-300">Altura m</span>
-              <input
-                v-model.number="formulaValues.height"
-                type="number"
-                step="any"
-                class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-              />
-            </label>
+          <div v-if="fórmulaType === 'bmi'" class="grid gap-3 sm:grid-cols-2">
+            <BaseNumberInput v-model="fórmulaValues.weight" label="Peso" :step="1" suffix="kg" />
+            <BaseNumberInput v-model="fórmulaValues.height" label="Altura" :step="0.01" suffix="m" />
           </div>
 
           <button
             type="submit"
-            class="w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60"
+            class="w-full rounded-md bg-teal-300 px-5 py-3 font-semibold text-slate-950 transition hover:bg-teal-200 disabled:opacity-60"
             :disabled="loading"
           >
             {{ loading ? 'Calculando...' : 'Calcular fórmula' }}
           </button>
         </form>
 
-        <div v-if="formulaResult" class="mt-5 space-y-4">
-          <div class="rounded-2xl border border-cyan-400/30 bg-cyan-400/10 p-5">
-            <p class="text-sm text-cyan-200">{{ formulaLabels[formulaType] }}</p>
-            <p class="mt-2 break-all font-mono text-2xl font-bold text-cyan-300">
-              {{ formulaResult.result }}
+        <div v-if="fórmulaResult" class="mt-5 space-y-4">
+          <div class="rounded-lg border border-teal-300/30 bg-teal-300/10 p-5">
+            <p class="text-sm text-teal-200">{{ fórmulaLabels[fórmulaType] }}</p>
+            <p class="mt-2 break-all font-mono text-2xl font-bold text-teal-200">
+              {{ fórmulaResult.result }}
             </p>
           </div>
 
-          <p class="rounded-xl border border-slate-800 bg-slate-950 p-4 text-sm text-slate-300">
-            {{ formulaResult.expression }}
+          <p class="rounded-md border border-white/10 bg-[#0b1020] p-4 text-sm text-slate-300">
+            {{ fórmulaResult.expression }}
           </p>
 
           <button
             type="button"
-            class="rounded-xl border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
+            class="rounded-md border border-teal-300 px-4 py-2 text-sm font-semibold text-teal-200 transition hover:bg-teal-300 hover:text-slate-950"
             @click="copyText(formulaCopyText)"
           >
             {{ copied ? 'Copiado!' : 'Copiar fórmula' }}

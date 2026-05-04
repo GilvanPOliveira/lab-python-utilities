@@ -160,7 +160,7 @@ function clearFields() {
 </script>
 
 <template>
-  <section class="mx-auto max-w-5xl space-y-6">
+  <section class="tool-page">
     <div>
       <h2 class="text-3xl font-bold text-white">Link Tools</h2>
       <p class="mt-2 text-slate-400">
@@ -170,7 +170,7 @@ function clearFields() {
 
     <div class="grid gap-6 lg:grid-cols-2">
       <form
-        class="min-h-[560px] space-y-5 rounded-2xl border border-slate-800 bg-slate-900 p-5"
+        class="min-h-[var(--tool-panel-min-height)] space-y-5 rounded-lg border border-white/10 bg-white/[0.045] p-5"
         @submit.prevent="processLink"
       >
         <div>
@@ -181,15 +181,15 @@ function clearFields() {
               v-for="option in actions"
               :key="option.key"
               type="button"
-              class="rounded-2xl border p-4 text-left transition"
+              class="rounded-lg border p-4 text-left transition"
               :class="action === option.key
-                ? 'border-cyan-400 bg-cyan-400/10'
-                : 'border-slate-800 bg-slate-950 hover:border-cyan-400/70'"
+                ? 'border-teal-300 bg-teal-300/10'
+                : 'border-white/10 bg-[#0b1020] hover:border-teal-300/70'"
               @click="selectAction(option.key)"
             >
               <span
                 class="block text-sm font-semibold"
-                :class="action === option.key ? 'text-cyan-300' : 'text-white'"
+                :class="action === option.key ? 'text-teal-200' : 'text-white'"
               >
                 {{ option.title }}
               </span>
@@ -201,7 +201,7 @@ function clearFields() {
           </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+        <div class="rounded-lg border border-white/10 bg-[#0b1020] p-4">
           <p class="text-sm font-semibold text-white">
             {{ currentAction?.title }}
           </p>
@@ -218,7 +218,7 @@ function clearFields() {
             v-model="value"
             rows="6"
             :placeholder="inputPlaceholder"
-            class="mt-2 w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+            class="mt-2 w-full resize-none rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
           />
         </label>
 
@@ -229,7 +229,7 @@ function clearFields() {
             v-model="customCode"
             type="text"
             placeholder="Ex: meu-link"
-            class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+            class="mt-2 w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
           />
 
           <p class="mt-2 text-xs text-slate-500">
@@ -240,7 +240,7 @@ function clearFields() {
         <div class="grid gap-3 sm:grid-cols-[1fr_auto]">
           <button
             type="submit"
-            class="rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+            class="rounded-md bg-teal-300 px-5 py-3 font-semibold text-slate-950 transition hover:bg-teal-200 disabled:cursor-not-allowed disabled:opacity-60"
             :disabled="loading"
           >
             {{ loading ? 'Processando...' : actionLabel }}
@@ -248,23 +248,23 @@ function clearFields() {
 
           <button
             type="button"
-            class="rounded-xl border border-slate-700 px-5 py-3 font-semibold text-slate-300 transition hover:border-red-400 hover:text-red-300"
+            class="rounded-md border border-white/10 px-5 py-3 font-semibold text-slate-300 transition hover:border-red-400 hover:text-red-300"
             @click="clearFields"
           >
             Limpar
           </button>
         </div>
 
-        <p v-if="action === 'shorten'" class="rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-3 text-xs leading-5 text-cyan-100">
-          O link encurtado é gerado pelo is.gd e funciona publicamente, sem banco de dados no projeto.
+        <p v-if="action === 'shorten'" class="rounded-md border border-teal-300/30 bg-teal-300/10 p-3 text-xs leading-5 text-teal-50">
+          O link encurtado  gerado pelo is.gd e funciona publicamente, sem banco de dados no projeto.
         </p>
 
-        <p v-if="error" class="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+        <p v-if="error" class="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
           {{ error }}
         </p>
       </form>
 
-      <div class="min-h-[560px] rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="min-h-[var(--tool-panel-min-height)] rounded-lg border border-white/10 bg-white/[0.045] p-5">
         <div class="flex items-start justify-between gap-4">
           <div>
             <h3 class="text-lg font-semibold text-white">Resultado</h3>
@@ -273,21 +273,21 @@ function clearFields() {
             </p>
           </div>
 
-          <span class="rounded-full border border-slate-700 px-3 py-1 text-xs font-medium text-slate-400">
+          <span class="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-slate-400">
             {{ action }}
           </span>
         </div>
 
         <div v-if="result" class="mt-5 space-y-4">
-          <div class="rounded-2xl border border-cyan-400/30 bg-cyan-400/10 p-5">
-            <p class="text-sm text-cyan-200">Resultado principal</p>
+          <div class="rounded-lg border border-teal-300/30 bg-teal-300/10 p-5">
+            <p class="text-sm text-teal-200">Resultado principal</p>
 
-            <p class="mt-2 break-all font-mono text-cyan-300">
+            <p class="mt-2 break-all font-mono text-teal-200">
               {{ resultToCopy }}
             </p>
           </div>
 
-          <div v-if="action === 'shorten'" class="rounded-xl border border-slate-800 bg-slate-950 p-4 text-sm text-slate-300">
+          <div v-if="action === 'shorten'" class="rounded-md border border-white/10 bg-[#0b1020] p-4 text-sm text-slate-300">
             <p class="break-all">
               <span class="text-slate-500">Original:</span>
               {{ result.original_url }}
@@ -299,7 +299,7 @@ function clearFields() {
             </p>
           </div>
 
-          <div v-if="action === 'clean'" class="rounded-xl border border-slate-800 bg-slate-950 p-4 text-sm text-slate-300">
+          <div v-if="action === 'clean'" class="rounded-md border border-white/10 bg-[#0b1020] p-4 text-sm text-slate-300">
             <p>
               <span class="text-slate-500">Domínio:</span>
               {{ result.domain }}
@@ -314,7 +314,7 @@ function clearFields() {
           <div class="flex flex-wrap gap-3">
             <button
               type="button"
-              class="rounded-xl border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
+              class="rounded-md border border-teal-300 px-4 py-2 text-sm font-semibold text-teal-200 transition hover:bg-teal-300 hover:text-slate-950"
               @click="copyResult"
             >
               {{ copied ? 'Copiado!' : 'Copiar resultado' }}
@@ -323,7 +323,7 @@ function clearFields() {
             <button
               v-if="openableUrl"
               type="button"
-              class="rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-cyan-400 hover:text-cyan-300"
+              class="rounded-md border border-white/10 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-teal-300 hover:text-teal-200"
               @click="openResult"
             >
               Abrir link

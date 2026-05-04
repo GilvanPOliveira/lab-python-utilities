@@ -29,21 +29,21 @@ async function generateQrCode() {
 </script>
 
 <template>
-  <section class="mx-auto max-w-3xl space-y-6">
+  <section class="tool-page">
     <div>
       <h2 class="text-3xl font-bold text-white">Gerador de QR Code</h2>
       <p class="mt-2 text-slate-400">Informe um texto ou URL para gerar um QR Code em PNG.</p>
     </div>
 
-    <form class="space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5" @submit.prevent="generateQrCode">
+    <form class="space-y-4 rounded-lg border border-white/10 bg-white/[0.045] p-5" @submit.prevent="generateQrCode">
       <textarea
         v-model="data"
-        class="min-h-32 w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-slate-100 outline-none focus:border-cyan-400"
+        class="min-h-32 w-full rounded-md border border-white/10 bg-[#0b1020] p-4 text-slate-100 outline-none focus:border-teal-300"
         placeholder="Digite uma URL ou texto"
       />
 
       <button
-        class="rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 disabled:opacity-60"
+        class="rounded-md bg-teal-300 px-5 py-3 font-semibold text-slate-950 disabled:opacity-60"
         :disabled="loading || !data.trim()"
       >
         {{ loading ? 'Gerando...' : 'Gerar QR Code' }}
@@ -52,17 +52,17 @@ async function generateQrCode() {
       <p v-if="error" class="text-sm text-red-400">{{ error }}</p>
     </form>
 
-    <div v-if="imageBase64" class="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+    <div v-if="imageBase64" class="rounded-lg border border-white/10 bg-white/[0.045] p-5">
       <img
         :src="`data:image/png;base64,${imageBase64}`"
         alt="QR Code gerado"
-        class="mx-auto h-64 w-64 rounded-xl bg-white p-3"
+        class="mx-auto h-64 w-64 rounded-md bg-white p-3"
       />
 
       <a
         :href="`data:image/png;base64,${imageBase64}`"
         download="qrcode.png"
-        class="mt-5 inline-flex rounded-xl border border-cyan-400 px-5 py-3 font-semibold text-cyan-300 hover:bg-cyan-400 hover:text-slate-950"
+        class="mt-5 inline-flex rounded-md border border-teal-300 px-5 py-3 font-semibold text-teal-200 hover:bg-teal-300 hover:text-slate-950"
       >
         Baixar QR Code
       </a>

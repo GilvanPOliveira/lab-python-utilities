@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { api } from '../services/api'
+import BaseNumberInput from '../components/BaseNumberInput.vue'
 
 type ImageMode = 'resize' | 'convert' | 'compress' | 'remove-background'
 
@@ -153,7 +154,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="mx-auto max-w-6xl space-y-6">
+  <section class="tool-page">
     <div>
       <h2 class="text-3xl font-bold text-white">Ferramentas de Imagem</h2>
       <p class="mt-2 text-slate-400">
@@ -161,19 +162,19 @@ onBeforeUnmount(() => {
       </p>
     </div>
 
-    <p v-if="error" class="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+    <p v-if="error" class="rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
       {{ error }}
     </p>
 
     <div class="grid gap-6 xl:grid-cols-[420px_1fr]">
-      <form class="h-fit space-y-5 rounded-2xl border border-slate-800 bg-slate-900 p-5" @submit.prevent="processImage">
+      <form class="h-fit space-y-5 rounded-lg border border-white/10 bg-white/[0.045] p-5" @submit.prevent="processImage">
         <label class="block">
           <span class="text-sm font-medium text-slate-300">Imagem</span>
 
           <input
             type="file"
             accept="image/*"
-            class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none file:mr-4 file:rounded-lg file:border-0 file:bg-cyan-400 file:px-3 file:py-2 file:font-semibold file:text-slate-950"
+            class="mt-2 w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-sm text-slate-300 outline-none"
             @change="handleFile"
           />
         </label>
@@ -181,7 +182,7 @@ onBeforeUnmount(() => {
         <div>
           <span class="text-sm font-medium text-slate-300">Ação</span>
 
-          <div class="mt-2 grid grid-cols-2 gap-2 rounded-2xl border border-slate-800 bg-slate-950 p-2">
+          <div class="mt-2 grid grid-cols-2 gap-2 rounded-lg border border-white/10 bg-[#0b1020] p-2">
             <button
               v-for="option in [
                 { key: 'resize', label: 'Redimensionar' },
@@ -191,10 +192,10 @@ onBeforeUnmount(() => {
               ]"
               :key="option.key"
               type="button"
-              class="rounded-xl px-3 py-3 text-sm font-semibold transition"
+              class="rounded-md px-3 py-3 text-sm font-semibold transition"
               :class="mode === option.key
-                ? 'bg-cyan-400 text-slate-950'
-                : 'text-slate-300 hover:bg-slate-900 hover:text-white'"
+                ? 'bg-teal-300 text-slate-950'
+                : 'text-slate-300 hover:bg-white/[0.045] hover:text-white'"
               @click="selectMode(option.key as ImageMode)"
             >
               {{ option.label }}
@@ -203,27 +204,8 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="mode === 'resize'" class="grid gap-3 sm:grid-cols-2">
-          <label class="block">
-            <span class="text-sm font-medium text-slate-300">Largura</span>
-            <input
-              v-model.number="width"
-              type="number"
-              min="1"
-              max="4000"
-              class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-            />
-          </label>
-
-          <label class="block">
-            <span class="text-sm font-medium text-slate-300">Altura</span>
-            <input
-              v-model.number="height"
-              type="number"
-              min="1"
-              max="4000"
-              class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
-            />
-          </label>
+          <BaseNumberInput v-model="width" label="Largura" :min="1" :max="4000" :step="10" suffix="px" />
+          <BaseNumberInput v-model="height" label="Altura" :min="1" :max="4000" :step="10" suffix="px" />
         </div>
 
         <label v-if="mode === 'convert' || mode === 'compress'" class="block">
@@ -231,7 +213,7 @@ onBeforeUnmount(() => {
 
           <select
             v-model="outputFormat"
-            class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
+            class="mt-2 w-full rounded-md border border-white/10 bg-[#0b1020] px-4 py-3 text-white outline-none focus:border-teal-300"
           >
             <option value="png">PNG</option>
             <option value="jpg">JPG</option>
@@ -239,10 +221,10 @@ onBeforeUnmount(() => {
           </select>
         </label>
 
-        <div v-if="mode === 'compress'" class="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+        <div v-if="mode === 'compress'" class="rounded-lg border border-white/10 bg-[#0b1020] p-4">
           <div class="flex items-center justify-between">
             <span class="text-sm font-medium text-slate-300">Qualidade</span>
-            <span class="text-lg font-bold text-cyan-300">{{ quality }}%</span>
+            <span class="text-lg font-bold text-teal-200">{{ quality }}%</span>
           </div>
 
           <input
@@ -250,13 +232,13 @@ onBeforeUnmount(() => {
             type="range"
             min="1"
             max="100"
-            class="mt-4 w-full accent-cyan-400"
+            class="mt-4 w-full accent-teal-300"
           />
         </div>
 
         <button
           type="submit"
-          class="w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+          class="w-full rounded-md bg-teal-300 px-5 py-3 font-semibold text-slate-950 transition hover:bg-teal-200 disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="loading"
         >
           {{ loading ? 'Processando...' : currentActionLabel }}
@@ -264,17 +246,17 @@ onBeforeUnmount(() => {
 
         <p
           v-if="mode === 'remove-background'"
-          class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-5 text-amber-200"
+          class="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-5 text-amber-200"
         >
           A primeira remoção de fundo pode demorar mais, pois usa processamento com modelo de imagem.
         </p>
 
-        <p class="rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs leading-5 text-slate-500">
-          Limite recomendado: imagens de até 5 MB e dimensões máximas de 4000px.
+        <p class="rounded-md border border-white/10 bg-[#0b1020] p-3 text-xs leading-5 text-slate-500">
+          Limite recomendado: imagens de até 5 MB e dimenses máximas de 4000px.
         </p>
       </form>
 
-      <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+      <div class="rounded-lg border border-white/10 bg-white/[0.045] p-5">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h3 class="text-lg font-semibold text-white">Preview e resultado</h3>
@@ -286,7 +268,7 @@ onBeforeUnmount(() => {
           <button
             v-if="result"
             type="button"
-            class="rounded-xl border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
+            class="rounded-md border border-teal-300 px-4 py-2 text-sm font-semibold text-teal-200 transition hover:bg-teal-300 hover:text-slate-950"
             @click="downloadImage"
           >
             Download
@@ -295,12 +277,12 @@ onBeforeUnmount(() => {
 
         <div class="mt-5 grid gap-5 lg:grid-cols-2">
           <div class="space-y-4">
-            <div class="flex h-72 items-center justify-center overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 p-4">
+            <div class="flex h-72 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-[#0b1020] p-4">
               <img
                 v-if="previewUrl"
                 :src="previewUrl"
                 alt="Preview original"
-                class="max-h-full max-w-full rounded-xl object-contain"
+                class="max-h-full max-w-full rounded-md object-contain"
               />
 
               <p v-else class="text-center text-sm text-slate-500">
@@ -308,7 +290,7 @@ onBeforeUnmount(() => {
               </p>
             </div>
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+            <div class="rounded-lg border border-white/10 bg-[#0b1020] p-4">
               <h4 class="text-sm font-semibold text-white">Imagem original</h4>
 
               <div v-if="file" class="mt-3 grid gap-2 text-sm text-slate-300">
@@ -324,12 +306,12 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="space-y-4">
-            <div class="flex h-72 items-center justify-center overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 p-4">
+            <div class="flex h-72 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-[#0b1020] p-4">
               <img
                 v-if="generatedImageUrl"
                 :src="generatedImageUrl"
                 alt="Imagem gerada"
-                class="max-h-full max-w-full rounded-xl object-contain"
+                class="max-h-full max-w-full rounded-md object-contain"
               />
 
               <p v-else class="text-center text-sm text-slate-500">
@@ -337,7 +319,7 @@ onBeforeUnmount(() => {
               </p>
             </div>
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+            <div class="rounded-lg border border-white/10 bg-[#0b1020] p-4">
               <h4 class="text-sm font-semibold text-white">Imagem gerada</h4>
 
               <div v-if="result" class="mt-3 grid gap-2 text-sm text-slate-300 sm:grid-cols-2">
@@ -354,10 +336,10 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div v-if="result" class="mt-5 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-4">
-          <p class="text-sm text-cyan-100">
+        <div v-if="result" class="mt-5 rounded-lg border border-teal-300/20 bg-teal-300/10 p-4">
+          <p class="text-sm text-teal-50">
             Arquivo pronto:
-            <span class="font-mono text-cyan-300">{{ result.filename }}</span>
+            <span class="font-mono text-teal-200">{{ result.filename }}</span>
           </p>
         </div>
       </div>
